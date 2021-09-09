@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve the project
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/devops-upskill
+Environment="PATH=/home/ubuntu/.cache/pypoetry/virtualenvs/upskill-python-app-LmL6pVLv-py3.8/bin"
+ExecStart=/home/ubuntu/.cache/pypoetry/virtualenvs/upskill-python-app-LmL6pVLv-py3.8/bin/gunicorn --workers 3 --bind unix:upskill.sock -m 007 wsgi:app
+
+[Install]
+WantedBy=multi-user.target
