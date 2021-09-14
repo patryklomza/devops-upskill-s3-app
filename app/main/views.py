@@ -42,7 +42,7 @@ def form():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             url = generate_presigned_url('plomza-bucket', key_name=filename)
-            files = {'file': filename}
+            files = {'file': file}
             http_response = requests.post(url['url'],data=url['fields'], files=files)
             flash('uploaded')
             return redirect(request.url)
