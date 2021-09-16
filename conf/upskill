@@ -4,6 +4,6 @@ server {
 
     location / {
         include proxy_params;
-        proxy_pass http://unix:/home/ubuntu/devops-upskill/upskill.sock;
+        proxy_pass http://unix:/var/www/webApp/upskill.sock;
     }
 }
