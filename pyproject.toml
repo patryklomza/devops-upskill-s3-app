@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "upskill-s3"
+name = "webapp"
 version = "0.1.0"
 description = ""
 authors = ["Patryk Lomza <p.lomza@outlook.com>"]
