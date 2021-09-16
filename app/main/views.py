@@ -58,7 +58,7 @@ def create_presigned_post(bucket_name, object_name,
     return response
 
 
-@s3_form.route('/', methods=['POST', 'GET'])
+@s3_form.route('/s3', methods=['POST', 'GET'])
 def form():
     try:
         presigned_response = create_presigned_post(bucket_name=BUCKET_NAME, object_name=OBJECT_NAME)
