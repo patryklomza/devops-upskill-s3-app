@@ -58,7 +58,7 @@ def create_presigned_post(bucket_name, object_name,
     return response
 
 
-@s3_form.route('/', methods=['POST', 'GET'])
+@s3_form.route('/s3', methods=['POST', 'GET'])
 def form():
     try:
         presigned_response = create_presigned_post(bucket_name=BUCKET_NAME, object_name=OBJECT_NAME)
@@ -68,7 +68,7 @@ def form():
         abort(404)
 
 
-@s3_form.route('/files')
+@s3_form.route('/s3/files')
 def get_objects():
     resource = session.resource('s3')
     my_bucket = resource.Bucket('plomza-bucket')
