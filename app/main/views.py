@@ -1,79 +1,77 @@
 import logging
-import os
 
 from botocore.exceptions import ClientError
-from flask import abort, request, flash, redirect, url_for
+from botocore.client import Config
+from flask import abort
 from flask import Blueprint, render_template
 from jinja2 import TemplateNotFound
 
 import boto3
-import requests
-from werkzeug.utils import secure_filename
 
 s3_form = Blueprint('s3_form', __name__)
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
+BUCKET_NAME = 'plomza-bucket'
+OBJECT_NAME = '${filename}'
 
 session = boto3.session.Session(profile_name='plomza')
+
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):
     s3_client = session.client('s3')
     try:
-        response = s3_client.generate_presigned_url('get_object', Params={'Bucket': bucket_name, 'Key': object_name}, ExpiresIn=expiration)
+        response = s3_client.generate_presigned_url('get_object', Params={'Bucket': bucket_name, 'Key': object_name},
+                                                    ExpiresIn=expiration)
     except ClientError as e:
         logging.error(e)
         return None
     return response
 
 
+def create_presigned_post(bucket_name, object_name,
+                          fields=None, conditions=None, expiration=3600):
+    """Generate a presigned URL S3 POST request to upload a file
+
+    :param bucket_name: string
+    :param object_name: string
+    :param fields: Dictionary of prefilled form fields
+    :param conditions: List of conditions to include in the policy
+    :param expiration: Time in seconds for the presigned URL to remain valid
+    :return: Dictionary with the following keys:
+        url: URL to post to
+        fields: Dictionary of form fields and values to submit with the POST
+    :return: None if error.
+    """
+
+    # Generate a presigned S3 POST URL
+    s3_client = boto3.client('s3', config=Config(signature_version='s3v4'))
+    try:
+        response = s3_client.generate_presigned_post(bucket_name,
+                                                     object_name,
+                                                     Fields=fields,
+                                                     Conditions=conditions,
+                                                     ExpiresIn=expiration)
+    except ClientError as e:
+        logging.error(e)
+        return None
+
+    # The response contains the presigned URL and required fields
+    return response
+
+
 @s3_form.route('/', methods=['POST', 'GET'])
 def form():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            url = generate_presigned_url('plomza-bucket', key_name=filename)
-            files = {'file': file}
-            http_response = requests.post(url['url'],data=url['fields'], files=files)
-            flash('uploaded')
-            return redirect(request.url)
     try:
-        return render_template('s3_form.html')
+        presigned_response = create_presigned_post(bucket_name=BUCKET_NAME, object_name=OBJECT_NAME)
+
+        return render_template('s3_form.html', response=presigned_response)
     except TemplateNotFound:
         abort(404)
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def generate_presigned_url(bucket_name, key_name, fields=None, conditions=None, expiration=3600):
-    url = session.client('s3').generate_presigned_post(
-        bucket_name,
-        key_name,
-        ExpiresIn=expiration)
-    return url
-
 @s3_form.route('/files')
 def get_objects():
-    client = session.resource('s3')
-    my_bucket = client.Bucket('plomza-bucket')
+    resource = session.resource('s3')
+    my_bucket = resource.Bucket('plomza-bucket')
     objects = my_bucket.objects.all()
-    objects_names_list = [object.key for object in objects]
-
-
-    presigned_url_list = [create_presigned_url('plomza-bucket', object.key) for object in objects ]
-    data = zip(objects_names_list, presigned_url_list)
+    data = [(obj.key, create_presigned_url('plomza-bucket', obj.key)) for obj in objects]
     return render_template('files.html', data=data)
-
-
