@@ -68,7 +68,7 @@ def form():
         abort(404)
 
 
-@s3_form.route('/files')
+@s3_form.route('/s3/files')
 def get_objects():
     resource = session.resource('s3')
     my_bucket = resource.Bucket('plomza-bucket')
