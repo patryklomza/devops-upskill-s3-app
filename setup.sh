@@ -6,7 +6,7 @@ apt-get install -y nginx
 git clone https://github.com/patryklomza/devops-upskill-s3-app.git /var/www/webApp
 chown -R ubuntu /var/www/webApp
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 -
-export PATH="/home/ubuntu/.local/bin:$PATH"
+source /var/www/webApp/env.sh
 poetry install
 cp ./conf/upskill.service /etc/systemd/system/upskill.service
 cp ./conf/upskill /etc/nginx/sites-available/upskill
