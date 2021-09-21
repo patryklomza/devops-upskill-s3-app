@@ -14,6 +14,7 @@
   <input type="hidden" name="X-Amz-Signature" value="{{response['fields']['x-amz-signature']}}" />
   <input type="hidden"   name="X-Amz-Algorithm" value="{{response['fields']['x-amz-algorithm']}}" />
   <input type="hidden"   name="X-Amz-Date" value="{{ response['fields']['x-amz-date'] }}" />
+  <input type="hidden"   name="X-Amz-Security-Token" value="{{ response['fields']['x-amz-security-token'] }}" />
 
   File:
   <input type="file" name="file"/> <br/>
