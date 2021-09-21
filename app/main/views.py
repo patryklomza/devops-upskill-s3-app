@@ -10,8 +10,11 @@ import boto3
 
 s3_form = Blueprint('s3_form', __name__)
 
-BUCKET_NAME = 'plomzabetterbucket'
+BUCKET_NAME = 'plomza-bucket'
 OBJECT_NAME = '${filename}'
+REGION_NAME = 'eu-central-1'
+
+config = Config(signature_version='s3v4', region_name=REGION_NAME)
 
 session = boto3.session.Session()
 
@@ -43,7 +46,7 @@ def create_presigned_post(bucket_name, object_name,
     """
 
     # Generate a presigned S3 POST URL
-    s3_client = boto3.client('s3', config=Config(signature_version='s3v4', region_name="eu-central-1"))
+    s3_client = boto3.client('s3', config=config)
     try:
         response = s3_client.generate_presigned_post(bucket_name,
                                                      object_name,
@@ -74,4 +77,5 @@ def get_objects():
     my_bucket = resource.Bucket(BUCKET_NAME)
     objects = my_bucket.objects.all()
     data = [(obj.key, create_presigned_url(BUCKET_NAME, obj.key)) for obj in objects]
+
     return render_template('files.html', data=data)
