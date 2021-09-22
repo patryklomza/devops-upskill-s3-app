@@ -73,7 +73,7 @@ def form():
 
 @s3_form.route('/s3/files')
 def get_objects():
-    resource = session.resource('s3')
+    resource = session.resource('s3', config=config)
     my_bucket = resource.Bucket(BUCKET_NAME)
     objects = my_bucket.objects.all()
     data = [(obj.key, create_presigned_url(BUCKET_NAME, obj.key)) for obj in objects]
