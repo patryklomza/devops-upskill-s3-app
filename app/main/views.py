@@ -16,7 +16,7 @@ REGION_NAME = 'eu-central-1'
 
 config = Config(signature_version='s3v4', region_name=REGION_NAME)
 
-session = boto3.session.Session()
+session = boto3.session.Session(config=config)
 
 
 def create_presigned_url(bucket_name, object_name, expiration=3600):
@@ -73,7 +73,7 @@ def form():
 
 @s3_form.route('/s3/files')
 def get_objects():
-    resource = session.resource('s3', config=config)
+    resource = session.resource('s3')
     my_bucket = resource.Bucket(BUCKET_NAME)
     objects = my_bucket.objects.all()
     data = [(obj.key, create_presigned_url(BUCKET_NAME, obj.key)) for obj in objects]
