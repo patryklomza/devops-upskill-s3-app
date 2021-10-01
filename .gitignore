@@ -19,6 +19,10 @@
 
 # .nfs files are created when an open file is removed but is still being accessed
 .nfs*
+### Terraform ###
+terraform.tfstate*
+.terraform
+*.tfvars
 
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
